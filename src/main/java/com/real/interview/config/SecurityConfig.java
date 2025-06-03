@@ -7,11 +7,15 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+
+    @Value("${spring.security.oauth2.enabled:true}")
+    private boolean oauth2Enabled;
 
     public SecurityConfig(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -40,11 +44,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/clients/**").hasRole("CLIENT")
                 .requestMatchers("/api/v1/listings/**").hasAnyRole("AGENT", "CLIENT")
                 .anyRequest().hasRole("ADMIN")
-            )
-            .oauth2Login(oauth2 -> oauth2
+            );
+        if (oauth2Enabled) {
+            http.oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("/oauth2/success", true)
-            )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+            );
+        }
+        http.addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
