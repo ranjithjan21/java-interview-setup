@@ -20,6 +20,7 @@ This is a Spring Boot backend application for a real estate platform, designed f
 - Mockito
 - Maven
 - Docker
+- GitHub Copilot (GenAI-assisted development)
 
 ## Getting Started
 
